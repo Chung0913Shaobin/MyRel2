@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>履歷分析與結果 | MyRel2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: #0f172a;
+            overflow-x: hidden;
+        }
+        
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.1) 0%, transparent 20%);
+            z-index: -1;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 213, 225, 0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.05) 0%, rgba(14, 165, 233, 0.02) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-drawer {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(203, 213, 225, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            border: 1px solid transparent;
+        }
+        
+        .nav-item:hover {
+            transform: translateY(-2px);
+            background: rgba(240, 249, 255, 0.7);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(14, 165, 233, 0.05) 100%);
+            border-color: rgba(56, 189, 248, 0.3);
+            position: relative;
+        }
+        
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: linear-gradient(90deg, #0369a1, #0ea5e9);
+            border-radius: 2px;
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, #0369a1, #0ea5e9);
+            border-radius: 2px;
+        }
+        
+        .upload-zone {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-zone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.05) 0%, rgba(14, 165, 233, 0.02) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .upload-zone:hover::before {
+            opacity: 1;
+        }
+        
+        .upload-zone:hover {
+            transform: translateY(-5px);
+            border-color: #0ea5e9;
+            box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.1);
+        }
+        
+        .analyze-btn {
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);
+        }
+        
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.3);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        .step-item {
+            transition: all 0.3s ease;
+        }
+        
+        .step-item.active .step-number {
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+            box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);
+        }
+        
+        .step-item.active .step-line {
+            background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+        }
+
+        .progress-bar {
+            transition: width 1s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <!-- 左側導航抽屜 -->
+    <div class="nav-drawer fixed left-0 top-0 h-full w-64 shadow-lg z-20">
+        <!-- 頂部 Logo 區域 -->
+        <div class="p-6 border-b border-[#e6f0ff]">
+            <a href="目錄.html" class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-[#0ea5e9] to-[#38bdf8] rounded-lg flex items-center justify-center">
+                    <span class="text-white text-xl font-bold">M2</span>
+                </div>
+                <h2 class="text-2xl font-bold text-[#1a4b8c]">MyRel2</h2>
+            </a>
+        </div>
+        
+        <!-- 導航選項 -->
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <!-- 個人檔案 -->
+                <li>
+                    <a href="個人檔案.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">個人檔案</span>
+                    </a>
+                </li>
+
+                <!-- 履歷分析 (當前頁面) -->
+                <li>
+                    <a href="履歷分析.html" class="nav-item active flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#e0f2fe] flex items-center justify-center">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">履歷分析</span>
+                    </a>
+                </li>
+
+                <!-- 技能檢測 -->
+                <li>
+                    <a href="技能檢測.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">技能檢測</span>
+                    </a>
+                </li>
+
+                <!-- 學習資源 -->
+                <li>
+                    <a href="學習資源.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">學習資源</span>
+                    </a>
+                </li>
+
+                <!-- 企業匹配 -->
+                <li>
+                    <a href="企業匹配.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">企業匹配</span>
+                    </a>
+                </li>
+
+                <!-- 職涯規劃 -->
+                <li>
+                    <a href="職涯規劃.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">職涯規劃</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- 主要內容區域 -->
+    <div class="ml-64">
+        <!-- 頂部導航欄 -->
+        <header class="sticky top-0 z-10 flex items-center justify-between px-8 py-4 bg-white/80 backdrop-blur-md border-b border-[#e6f0ff] shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#f0f7ff]">
+                    <svg class="w-6 h-6 text-[#1a4b8c]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-[#1a4b8c]">履歷分析</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="目錄.html" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-[#f0f7ff] text-[#1a4b8c] transition-all">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="text-xl">首頁</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- 主要內容 -->
+        <main class="max-w-7xl mx-auto p-8">
+            <!-- 頂部標題區域 -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-[#1a4b8c] mb-4">履歷分析</h1>
+                <p class="text-xl text-[#334155]">上傳您的履歷，獲取專業的分析評估</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-8">
+                <!-- 上傳區域 -->
+                <div class="card rounded-2xl p-6 animate-fadeIn" style="animation-delay: 0.2s;">
+                    <h3 class="section-title text-2xl font-bold text-[#1a4b8c] mb-8">上傳您的履歷</h3>
+                    
+                    <div class="space-y-8">
+                        <!-- 檔案上傳區 -->
+                        <div class="upload-zone w-full border-2 border-dashed border-[#e6f0ff] rounded-xl p-8 text-center" id="drop-area">
+                            <input type="file" id="resume" class="hidden" accept=".pdf,.doc,.docx"/>
+                            <label for="resume" class="cursor-pointer block">
+                                <div class="flex flex-col items-center gap-4">
+                                    <div class="size-14 rounded-full bg-[#f0f7ff] flex items-center justify-center">
+                                        <svg class="w-7 h-7 text-[#0ea5e9]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M4 16l4 4 4-4m0 0l4-4-4-4m0 0L8 8l-4 4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-lg text-[#1a4b8c] font-medium mb-2">點擊或拖放檔案至此處上傳</p>
+                                        <p class="text-sm text-[#93adc8]">支援 PDF、Word 檔案格式</p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- 分隔線 -->
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 h-px bg-[#e6f0ff]"></div>
+                            <span class="text-[#93adc8] text-sm font-medium">或是</span>
+                            <div class="flex-1 h-px bg-[#e6f0ff]"></div>
+                        </div>
+
+                        <!-- 文字輸入區 -->
+                        <div class="relative">
+                            <textarea
+                                id="resumeContent"
+                                placeholder="在此貼上您的履歷內容..."
+                                class="w-full min-h-[200px] p-4 rounded-xl border border-[#e6f0ff] text-[#1a4b8c] focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] focus:border-transparent resize-none text-base"
+                            ></textarea>
+                            <div id="pasteHint" class="absolute inset-0 flex items-center justify-center bg-[#1a4b8c]/5 backdrop-blur-sm rounded-xl opacity-0 transition-opacity duration-300 pointer-events-none">
+                                <div class="bg-white/90 px-4 py-2 rounded-lg shadow-lg">
+                                    <p class="text-[#1a4b8c] text-sm font-medium">按下 Ctrl+V 貼上文字</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 分析按鈕 -->
+                        <div class="mt-6">
+                            <button id="analyzeBtn" class="w-full px-6 py-4 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none">
+                                <span class="flex items-center justify-center gap-2">
+                                    <svg id="analyzeIcon" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span id="analyzeText">開始分析</span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分析結果區域 -->
+                <div id="analysisResult" class="mt-8 space-y-6 hidden">
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <h3 class="text-xl font-bold text-[#1a4b8c] mb-4">分析結果</h3>
+                        
+                        <!-- 評分卡片 -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <!-- DeepSeek 評分 -->
+                            <div class="bg-[#f0f7ff] rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[#1a4b8c] font-medium">DeepSeek</span>
+                                    <span id="deepseekScore" class="text-[#0ea5e9] font-bold">0</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div id="deepseekProgress" class="progress-bar bg-[#0ea5e9] h-2.5 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- OpenAI 評分 -->
+                            <div class="bg-[#f0f7ff] rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[#1a4b8c] font-medium">OpenAI</span>
+                                    <span id="openaiScore" class="text-[#0ea5e9] font-bold">0</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div id="openaiProgress" class="progress-bar bg-[#0ea5e9] h-2.5 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Gemini 評分 -->
+                            <div class="bg-[#f0f7ff] rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[#1a4b8c] font-medium">Gemini</span>
+                                    <span id="geminiScore" class="text-[#0ea5e9] font-bold">0</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div id="geminiProgress" class="progress-bar bg-[#0ea5e9] h-2.5 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 詳細分析結果 -->
+                        <div id="analysisDetails" class="prose max-w-none">
+                            <!-- 分析結果將在這裡動態顯示 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 獲取所有需要的元素
+            const dropArea = document.getElementById('drop-area');
+            const fileInput = document.getElementById('resume');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const analyzeIcon = document.getElementById('analyzeIcon');
+            const analyzeText = document.getElementById('analyzeText');
+            const analysisResult = document.getElementById('analysisResult');
+            const resumeContent = document.getElementById('resumeContent');
+            const pasteHint = document.getElementById('pasteHint');
+
+            // 初始化按鈕狀態
+            analyzeBtn.disabled = true;
+
+            // 更新按鈕狀態的函數
+            function updateAnalyzeButton() {
+                const hasFile = fileInput.files.length > 0;
+                const hasText = resumeContent.value.trim().length > 0;
+                analyzeBtn.disabled = !(hasFile || hasText);
+                
+                if (analyzeBtn.disabled) {
+                    analyzeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    analyzeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            // 檔案上傳相關功能
+            dropArea.addEventListener('click', (e) => {
+                if (e.target !== fileInput) {
+                    fileInput.click();
+                }
+            });
+
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type === 'application/pdf' || 
+                        file.type === 'application/msword' || 
+                        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                        const fileNameElement = dropArea.querySelector('p');
+                        fileNameElement.textContent = file.name;
+                        fileNameElement.classList.add('text-[#0ea5e9]');
+                        updateAnalyzeButton();
+                    } else {
+                        alert('請上傳 PDF 或 Word 檔案');
+                    }
+                }
+            }
+
+            // 文字輸入區域相關功能
+            resumeContent.addEventListener('input', () => {
+                if (resumeContent.value) {
+                    pasteHint.style.opacity = '0';
+                } else {
+                    pasteHint.style.opacity = '1';
+                }
+                updateAnalyzeButton();
+            });
+
+            // 分析按鈕點擊事件
+            analyzeBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                
+                if (analyzeBtn.disabled) return;
+
+                const formData = new FormData();
+                let content = '';
+
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    if (file.size > 10 * 1024 * 1024) { // 10MB
+                        alert('檔案大小不能超過 10MB');
+                        return;
+                    }
+                    formData.append('file', file);
+                } else if (resumeContent.value.trim()) {
+                    content = resumeContent.value.trim();
+                    formData.append('content', content);
+                }
+
+                // 更新按鈕狀態為載入中
+                analyzeBtn.disabled = true;
+                analyzeIcon.innerHTML = '<path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+                analyzeText.textContent = '分析中...';
+                analyzeBtn.classList.add('opacity-50');
+
+                try {
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.error || '上傳失敗');
+                    }
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // 顯示分析結果區域
+                    analysisResult.classList.remove('hidden');
+                    
+                    // 更新評分
+                    updateScores(data.score_data);
+                    
+                    // 更新詳細分析
+                    const analysisDetails = document.getElementById('analysisDetails');
+                    analysisDetails.innerHTML = data.analysis_text;
+                    
+                    // 滾動到分析結果區域
+                    analysisResult.scrollIntoView({ behavior: 'smooth' });
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('分析過程發生錯誤：' + error.message);
+                } finally {
+                    // 恢復按鈕狀態
+                    analyzeBtn.disabled = false;
+                    analyzeIcon.innerHTML = '<path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+                    analyzeText.textContent = '開始分析';
+                    analyzeBtn.classList.remove('opacity-50');
+                    updateAnalyzeButton();
+                }
+            });
+
+            // 更新評分顯示
+            function updateScores(scores) {
+                // 更新總分顯示
+                document.getElementById('deepseekScore').textContent = scores.deepseek;
+                document.getElementById('openaiScore').textContent = scores.openai;
+                document.getElementById('geminiScore').textContent = scores.gemini;
+                
+                // 更新進度條
+                const progressBars = document.querySelectorAll('.progress-bar');
+                progressBars.forEach(bar => {
+                    const score = bar.id === 'deepseekProgress' ? scores.deepseek :
+                                 bar.id === 'openaiProgress' ? scores.openai :
+                                 scores.gemini;
+                    bar.style.width = `${score}%`;
+                });
+                
+                // 更新詳細評分和推薦職位
+                const analysisDetails = document.getElementById('analysisDetails');
+                analysisDetails.innerHTML = scores.analysis_text;
+            }
+        });
+    </script>
+</body>
+</html> 

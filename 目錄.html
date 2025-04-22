@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>履歷優化與能力需求配對平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: #0f172a;
+            overflow-x: hidden;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 213, 225, 0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(14, 165, 233, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 30px -10px rgba(14, 165, 233, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.1) 0%, transparent 20%);
+            z-index: -1;
+        }
+        
+        .icon-container {
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.2);
+        }
+        
+        .card:hover .icon-container {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 20px -5px rgba(14, 165, 233, 0.3);
+        }
+        
+        .title-gradient {
+            background: linear-gradient(90deg, #0369a1, #0ea5e9);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+        
+        .title-gradient::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #0369a1, #0ea5e9);
+            border-radius: 2px;
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .card-content {
+            z-index: 10;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    <div class="min-h-screen flex flex-col items-center justify-center p-8">
+        <!-- 標題區 -->
+        <div class="text-center mb-16 floating">
+            <h1 class="mb-6">
+                <span class="text-7xl font-bold title-gradient tracking-tight">MyRel2</span>
+            </h1>
+            <p class="text-2xl text-sky-900 max-w-2xl mx-auto mt-8 font-medium">履歷優化與能力需求配對平台</p>
+        </div>
+
+        <!-- 功能卡片網格 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full">
+            <!-- 履歷分析卡片 -->
+            <a href="履歷分析.html" class="card rounded-3xl p-8 flex flex-col items-center hover:cursor-pointer group">
+                <div class="card-content flex flex-col items-center">
+                    <div class="icon-container mb-6 group-hover:bg-sky-600">
+                        <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sky-900 mb-3">履歷分析</h3>
+                    <p class="text-sky-700 text-center">分析您的職業技能，獲取專業評估</p>
+                </div>
+            </a>
+
+            <!-- 技能檢測卡片 -->
+            <a href="技能檢測.html" class="card rounded-3xl p-8 flex flex-col items-center hover:cursor-pointer group">
+                <div class="card-content flex flex-col items-center">
+                    <div class="icon-container mb-6 group-hover:bg-sky-600">
+                        <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sky-900 mb-3">技能檢測</h3>
+                    <p class="text-sky-700 text-center">評估您的專業技能，發現提升空間</p>
+                </div>
+            </a>
+
+            <!-- 學習資源卡片 -->
+            <a href="學習資源.html" class="card rounded-3xl p-8 flex flex-col items-center hover:cursor-pointer group">
+                <div class="card-content flex flex-col items-center">
+                    <div class="icon-container mb-6 group-hover:bg-sky-600">
+                        <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sky-900 mb-3">學習資源</h3>
+                    <p class="text-sky-700 text-center">探索學習機會，提升專業能力</p>
+                </div>
+            </a>
+
+            <!-- 個人檔案卡片 -->
+            <a href="個人檔案.html" class="card rounded-3xl p-8 flex flex-col items-center hover:cursor-pointer group">
+                <div class="card-content flex flex-col items-center">
+                    <div class="icon-container mb-6 group-hover:bg-sky-600">
+                        <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sky-900 mb-3">個人檔案</h3>
+                    <p class="text-sky-700 text-center">管理您的個人資訊，完善職業形象</p>
+                </div>
+            </a>
+
+            <!-- 企業匹配卡片 -->
+            <a href="企業匹配.html" class="card rounded-3xl p-8 flex flex-col items-center hover:cursor-pointer group">
+                <div class="card-content flex flex-col items-center">
+                    <div class="icon-container mb-6 group-hover:bg-sky-600">
+                        <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sky-900 mb-3">企業匹配</h3>
+                    <p class="text-sky-700 text-center">尋找最適合的工作，實現職業目標</p>
+                </div>
+            </a>
+
+            <!-- 職涯規劃卡片 -->
+            <a href="職涯規劃.html" class="card rounded-3xl p-8 flex flex-col items-center hover:cursor-pointer group">
+                <div class="card-content flex flex-col items-center">
+                    <div class="icon-container mb-6 group-hover:bg-sky-600">
+                        <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sky-900 mb-3">職涯規劃</h3>
+                    <p class="text-sky-700 text-center">規劃您的職業發展，把握未來機會</p>
+                </div>
+            </a>
+        </div>
+        
+        <div class="mt-16 text-center">
+            <p class="text-sky-700 text-sm">© 2023 MyRel2 - 專業的履歷優化與能力需求配對平台</p>
+        </div>
+    </div>
+
+    <script>
+        // 添加滑鼠跟隨效果
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            document.querySelector('.bg-pattern').style.backgroundImage = `
+                radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(56, 189, 248, 0.15), transparent 30%),
+                radial-gradient(circle at ${(1-x) * 100}% ${(1-y) * 100}%, rgba(14, 165, 233, 0.1), transparent 30%)
+            `;
+        });
+        
+        // 卡片進入視圖動畫
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

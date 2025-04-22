@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學習資源 - 職涯發展平台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: #0f172a;
+            overflow-x: hidden;
+        }
+        
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.1) 0%, transparent 20%);
+            z-index: -1;
+            transition: background-image 0.5s ease;
+        }
+
+        .search-container {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 213, 225, 0.5);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -2px rgba(14, 165, 233, 0.1);
+        }
+
+        .search-input {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .search-input:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+            background: white;
+        }
+
+        .filter-select {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            appearance: none;
+            padding-right: 2.5rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231a4b8c'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5rem;
+        }
+
+        .filter-select:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+            background-color: white;
+        }
+
+        .course-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 213, 225, 0.5);
+            border-radius: 16px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.05) 0%, rgba(14, 165, 233, 0.02) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .course-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.1);
+        }
+
+        .course-card:hover::before {
+            opacity: 1;
+        }
+
+        .course-logo {
+            transition: transform 0.4s ease;
+        }
+
+        .course-card:hover .course-logo {
+            transform: scale(1.05);
+        }
+
+        .tag {
+            background: rgba(240, 249, 255, 0.7);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tag:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .learning-path {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 213, 225, 0.5);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .learning-path:hover {
+            transform: translateY(-4px);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 12px 20px -5px rgba(14, 165, 233, 0.1);
+        }
+
+        .progress-bar {
+            background: rgba(240, 249, 255, 0.7);
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+            border-radius: 9999px;
+            transition: width 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -2px rgba(14, 165, 233, 0.3);
+        }
+
+        .nav-item {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            transform: translateY(-2px);
+            background: rgba(240, 249, 255, 0.7);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(14, 165, 233, 0.05) 100%);
+            border-color: rgba(56, 189, 248, 0.3);
+            position: relative;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: linear-gradient(90deg, #0369a1, #0ea5e9);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-[#f0f9ff]">
+    <div class="bg-pattern"></div>
+    <!-- 左側導航抽屜 -->
+    <div class="nav-drawer fixed left-0 top-0 h-full w-64 shadow-lg z-20">
+        <!-- 頂部 Logo 區域 -->
+        <div class="p-6 border-b border-[#e6f0ff]">
+            <a href="目錄.html" class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-[#0ea5e9] to-[#38bdf8] rounded-lg flex items-center justify-center">
+                    <span class="text-white text-xl font-bold">M2</span>
+                </div>
+                <h2 class="text-2xl font-bold text-[#1a4b8c]">MyRel2</h2>
+            </a>
+        </div>
+        <!-- 導航選項 -->
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <!-- 個人檔案 -->
+                <li>
+                    <a href="個人檔案.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">個人檔案</span>
+                    </a>
+                </li>
+                <!-- 履歷分析 -->
+                <li>
+                    <a href="履歷分析.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">履歷分析</span>
+                    </a>
+                </li>
+                <!-- 技能檢測 -->
+                <li>
+                    <a href="技能檢測.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">技能檢測</span>
+                    </a>
+                </li>
+                <!-- 學習資源 (當前頁面) -->
+                <li>
+                    <a href="學習資源.html" class="nav-item active flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#e0f2fe] flex items-center justify-center">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">學習資源</span>
+                    </a>
+                </li>
+                <!-- 企業匹配 -->
+                <li>
+                    <a href="企業匹配.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">企業匹配</span>
+                    </a>
+                </li>
+                <!-- 職涯規劃 -->
+                <li>
+                    <a href="職涯規劃.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">職涯規劃</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- 主要內容區域 -->
+    <div class="ml-64">
+        <!-- 頂部導航欄 -->
+        <header class="sticky top-0 z-10 flex items-center justify-between px-8 py-4 bg-white/80 backdrop-blur-md border-b border-[#e6f0ff] shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#f0f7ff]">
+                    <svg class="w-6 h-6 text-[#1a4b8c]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-[#1a4b8c]">學習資源</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="目錄.html" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-[#f0f7ff] text-[#1a4b8c] transition-all">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="text-xl">首頁</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- 主要內容 -->
+        <main class="max-w-7xl mx-auto px-8 py-8">
+            <!-- 搜尋與篩選 -->
+            <div class="card rounded-2xl p-6 mb-8 animate-fadeIn" style="animation-delay: 0.1s;">
+                <div class="space-y-4">
+                    <div class="flex gap-4">
+                        <input type="text" 
+                               placeholder="搜尋課程或技能" 
+                               class="w-full px-4 py-2.5 rounded-xl border border-[#e6f0ff] focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] focus:border-transparent text-lg">
+                        <button class="px-8 py-2.5 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white rounded-xl hover:opacity-90 transition-all duration-300 text-lg font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            搜尋
+                        </button>
+                    </div>
+                    <div class="flex gap-4">
+                        <select class="filter-select px-4 py-2.5 rounded-xl text-[#1a4b8c] text-lg flex-1">
+                            <option>技能分類</option>
+                            <option>程式語言</option>
+                            <option>前端開發</option>
+                            <option>後端開發</option>
+                            <option>資料庫</option>
+                        </select>
+                        <select class="filter-select px-4 py-2.5 rounded-xl text-[#1a4b8c] text-lg flex-1">
+                            <option>難度等級</option>
+                            <option>入門</option>
+                            <option>進階</option>
+                            <option>專家</option>
+                        </select>
+                        <select class="filter-select px-4 py-2.5 rounded-xl text-[#1a4b8c] text-lg flex-1">
+                            <option>課程時長</option>
+                            <option>0-2小時</option>
+                            <option>2-5小時</option>
+                            <option>5小時以上</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 課程卡片網格 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Hahow 卡片 -->
+                <div class="course-card animate-fadeInUp" style="animation-delay: 0.2s;">
+                    <div class="h-[180px] bg-[#f0f7ff] flex items-center justify-center overflow-hidden">
+                        <span class="course-logo text-[#1a4b8c] text-5xl font-bold">Ha</span>
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="flex justify-between items-start gap-4 mb-4">
+                            <h4 class="text-[#1a4b8c] font-bold text-lg line-clamp-2 flex-grow">Python 入門特訓 - 基礎實作到證照攻略</h4>
+                            <span class="px-3 py-1 bg-[#e6f4f1] text-[#1a4b8c] rounded-full text-sm whitespace-nowrap">9.9小時</span>
+                        </div>
+                        <p class="text-[#93adc8] mb-3">Hahow</p>
+                        <div class="flex items-center gap-4 text-[#93adc8] text-sm mb-4">
+                            <span>NT$1,790</span>
+                            <span>中文</span>
+                        </div>
+                        <div class="flex gap-2 flex-wrap mb-6">
+                            <span class="tag px-3 py-1 rounded-full text-sm">Python</span>
+                            <span class="tag px-3 py-1 rounded-full text-sm">程式入門</span>
+                        </div>
+                        <a href="https://hahow.in/courses/python-basics" target="_blank" 
+                           class="mt-auto w-full py-2.5 bg-[#1a4b8c] text-white rounded-lg hover:bg-[#0066cc] transition-all text-center">
+                            課程連結
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Coursera 卡片 -->
+                <div class="course-card animate-fadeInUp" style="animation-delay: 0.3s;">
+                    <div class="h-[180px] bg-[#f8faff] flex items-center justify-center overflow-hidden">
+                        <span class="course-logo text-[#1a4b8c] text-5xl font-bold">Co</span>
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="flex justify-between items-start gap-4 mb-4">
+                            <h4 class="text-[#1a4b8c] font-bold text-lg line-clamp-2 flex-grow">Python for Everybody</h4>
+                            <span class="px-3 py-1 bg-[#e6f4f1] text-[#1a4b8c] rounded-full text-sm whitespace-nowrap">3-6個月</span>
+                        </div>
+                        <p class="text-[#93adc8] mb-3">Coursera</p>
+                        <div class="flex items-center gap-4 text-[#93adc8] text-sm mb-4">
+                            <span>Freemium</span>
+                            <span>英文</span>
+                        </div>
+                        <div class="flex gap-2 flex-wrap mb-6">
+                            <span class="tag px-3 py-1 rounded-full text-sm">Python</span>
+                            <span class="tag px-3 py-1 rounded-full text-sm">Data Analysis</span>
+                        </div>
+                        <a href="https://www.coursera.org/specializations/python" target="_blank" 
+                           class="mt-auto w-full py-2.5 bg-[#1a4b8c] text-white rounded-lg hover:bg-[#0066cc] transition-all text-center">
+                            課程連結
+                        </a>
+                    </div>
+                </div>
+
+                <!-- NTU OCW 卡片 -->
+                <div class="course-card animate-fadeInUp" style="animation-delay: 0.4s;">
+                    <div class="h-[180px] bg-[#f8faff] flex items-center justify-center overflow-hidden">
+                        <span class="course-logo text-[#1a4b8c] text-5xl font-bold">NTU</span>
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="flex justify-between items-start gap-4 mb-4">
+                            <h4 class="text-[#1a4b8c] font-bold text-lg line-clamp-2 flex-grow">資訊經濟</h4>
+                            <span class="px-3 py-1 bg-[#e6f4f1] text-[#1a4b8c] rounded-full text-sm whitespace-nowrap">13講</span>
+                        </div>
+                        <p class="text-[#93adc8] mb-3">NTU OCW</p>
+                        <div class="flex items-center gap-4 text-[#93adc8] text-sm mb-4">
+                            <span>免費</span>
+                            <span>中文</span>
+                        </div>
+                        <div class="flex gap-2 flex-wrap mb-6">
+                            <span class="tag px-3 py-1 rounded-full text-sm">資訊</span>
+                            <span class="tag px-3 py-1 rounded-full text-sm">經濟</span>
+                        </div>
+                        <a href="https://ocw.aca.ntu.edu.tw/ntu-ocw/ocw/cou/104S108" target="_blank" 
+                           class="mt-auto w-full py-2.5 bg-[#1a4b8c] text-white rounded-lg hover:bg-[#0066cc] transition-all text-center">
+                            課程連結
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 學習路徑 -->
+            <div class="mt-8">
+                <h3 class="text-[#1a4b8c] text-2xl font-bold mb-6">推薦學習路徑</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="learning-path p-6 animate-fadeInUp" style="animation-delay: 0.5s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="text-[#1a4b8c] font-bold text-lg mb-2">全端工程師養成之路</h4>
+                                <p class="text-[#93adc8]">從前端到後端的完整學習路徑</p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-[#93adc8]">完成度</span>
+                                <div class="progress-bar w-32 h-2">
+                                    <div class="progress-bar-fill" style="width: 60%"></div>
+                                </div>
+                                <span class="text-[#1a4b8c] font-medium">60%</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 flex-wrap">
+                            <span class="tag px-3 py-1 rounded-full text-sm">15門課程</span>
+                            <span class="tag px-3 py-1 rounded-full text-sm">120小時</span>
+                            <span class="tag px-3 py-1 rounded-full text-sm">3,456人學習</span>
+                        </div>
+                    </div>
+
+                    <div class="learning-path p-6 animate-fadeInUp" style="animation-delay: 0.6s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="text-[#1a4b8c] font-bold text-lg mb-2">雲端架構師進階之路</h4>
+                                <p class="text-[#93adc8]">從基礎到進階的雲端技術學習</p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-[#93adc8]">完成度</span>
+                                <div class="progress-bar w-32 h-2">
+                                    <div class="progress-bar-fill" style="width: 30%"></div>
+                                </div>
+                                <span class="text-[#1a4b8c] font-medium">30%</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 flex-wrap">
+                            <span class="tag px-3 py-1 rounded-full text-sm">12門課程</span>
+                            <span class="tag px-3 py-1 rounded-full text-sm">90小時</span>
+                            <span class="tag px-3 py-1 rounded-full text-sm">2,345人學習</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 修正游標互動效果的語法錯誤
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            document.querySelector('.bg-pattern').style.backgroundImage = `
+                radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(56, 189, 248, 0.15), transparent 30%),
+                radial-gradient(circle at ${(1-x) * 100}% ${(1-y) * 100}%, rgba(14, 165, 233, 0.1), transparent 30%)
+            `;
+        });
+
+        // 添加進度條動畫
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.width = entry.target.dataset.progress;
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.progress-bar-fill').forEach(bar => {
+            bar.style.width = '0%';
+            bar.dataset.progress = bar.style.width;
+            observer.observe(bar);
+        });
+    </script>
+</body>
+</html> 

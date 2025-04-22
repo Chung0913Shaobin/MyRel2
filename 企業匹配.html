@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業匹配 | MyRel2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: #0f172a;
+            overflow-x: hidden;
+        }
+        
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.1) 0%, transparent 20%);
+            z-index: -1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 213, 225, 0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.05) 0%, rgba(14, 165, 233, 0.02) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-drawer {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(203, 213, 225, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            border: 1px solid transparent;
+        }
+        
+        .nav-item:hover {
+            transform: translateY(-2px);
+            background: rgba(240, 249, 255, 0.7);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(14, 165, 233, 0.05) 100%);
+            border-color: rgba(56, 189, 248, 0.3);
+            position: relative;
+        }
+        
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: linear-gradient(90deg, #0369a1, #0ea5e9);
+            border-radius: 2px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <!-- 左側導航抽屜 -->
+    <div class="nav-drawer fixed left-0 top-0 h-full w-64 shadow-lg z-20">
+        <!-- 頂部 Logo 區域 -->
+        <div class="p-6 border-b border-[#e6f0ff]">
+            <a href="目錄.html" class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-[#0ea5e9] to-[#38bdf8] rounded-lg flex items-center justify-center">
+                    <span class="text-white text-xl font-bold">M2</span>
+                </div>
+                <h2 class="text-2xl font-bold text-[#1a4b8c]">MyRel2</h2>
+            </a>
+        </div>
+        
+        <!-- 導航選項 -->
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <!-- 個人檔案 -->
+                <li>
+                    <a href="個人檔案.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">個人檔案</span>
+                    </a>
+                </li>
+
+                <!-- 履歷分析 -->
+                <li>
+                    <a href="履歷分析.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">履歷分析</span>
+                    </a>
+                </li>
+
+                <!-- 技能檢測 -->
+                <li>
+                    <a href="技能檢測.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">技能檢測</span>
+                    </a>
+                </li>
+
+                <!-- 學習資源 -->
+                <li>
+                    <a href="學習資源.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">學習資源</span>
+                    </a>
+                </li>
+
+                <!-- 企業匹配 (當前頁面) -->
+                <li>
+                    <a href="企業匹配.html" class="nav-item active flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#e0f2fe] flex items-center justify-center">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">企業匹配</span>
+                    </a>
+                </li>
+
+                <!-- 職涯規劃 -->
+                <li>
+                    <a href="職涯規劃.html" class="nav-item flex items-center gap-3 px-4 py-3 text-[#1a4b8c] group">
+                        <div class="w-8 h-8 rounded-full bg-[#f0f7ff] flex items-center justify-center group-hover:bg-[#e0f2fe]">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-medium">職涯規劃</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- 主要內容區域 -->
+    <div class="ml-64">
+        <!-- 頂部導航欄 -->
+        <header class="sticky top-0 z-10 flex items-center justify-between px-8 py-4 bg-white/80 backdrop-blur-md border-b border-[#e6f0ff] shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#f0f7ff]">
+                    <svg class="w-6 h-6 text-[#1a4b8c]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-[#1a4b8c]">企業匹配</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="目錄.html" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-[#f0f7ff] text-[#1a4b8c] transition-all">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="text-xl">首頁</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- 主要內容 -->
+        <main class="max-w-6xl mx-auto px-8 py-8">
+            <!-- 搜尋與篩選 -->
+            <div class="card rounded-2xl p-6 mb-8 animate-fadeIn" style="animation-delay: 0.1s;">
+                <div class="space-y-4">
+                    <div class="flex gap-4">
+                        <input type="text" 
+                               placeholder="搜尋公司或職位" 
+                               class="w-full px-4 py-3 rounded-xl border border-[#e6f0ff] focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] focus:border-transparent text-lg">
+                        <button class="px-8 py-3 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white rounded-xl hover:opacity-90 transition-all duration-300 text-lg font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            搜尋
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <select class="w-full px-4 py-3 rounded-xl border border-[#e6f0ff] focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] focus:border-transparent">
+                            <option>產業類別</option>
+                            <option>科技業</option>
+                            <option>金融業</option>
+                            <option>製造業</option>
+                        </select>
+                        <select class="w-full px-4 py-3 rounded-xl border border-[#e6f0ff] focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] focus:border-transparent">
+                            <option>工作地點</option>
+                            <option>台北市</option>
+                            <option>新北市</option>
+                            <option>桃園市</option>
+                        </select>
+                        <select class="w-full px-4 py-3 rounded-xl border border-[#e6f0ff] focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] focus:border-transparent">
+                            <option>公司規模</option>
+                            <option>1-50人</option>
+                            <option>51-200人</option>
+                            <option>201-500人</option>
+                            <option>500人以上</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 匹配結果 -->
+            <div class="space-y-6">
+                <!-- 企業卡片 -->
+                <div class="card rounded-2xl p-8 animate-fadeIn" style="animation-delay: 0.2s;">
+                    <div class="flex items-start gap-8">
+                        <div class="w-20 h-20 bg-gradient-to-br from-[#0ea5e9] to-[#38bdf8] rounded-xl flex items-center justify-center shadow-lg">
+                            <span class="text-white text-2xl font-bold">T</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 class="text-2xl font-bold text-[#1a4b8c] mb-2">台積電</h3>
+                                    <p class="text-[#93adc8] text-lg">半導體製造</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-[#1a4b8c] font-bold text-lg">匹配度</span>
+                                    <div class="px-4 py-2 bg-gradient-to-r from-[#e6f4f1] to-[#f0f7ff] rounded-xl font-bold text-lg text-[#1a4b8c]">
+                                        92%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-6 mb-6">
+                                <div class="p-4 rounded-xl bg-[#f8faff]">
+                                    <div class="text-[#93adc8] text-base mb-1">工作地點</div>
+                                    <div class="text-[#1a4b8c] text-lg font-medium">新竹市</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-[#f8faff]">
+                                    <div class="text-[#93adc8] text-base mb-1">公司規模</div>
+                                    <div class="text-[#1a4b8c] text-lg font-medium">5萬人以上</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-[#f8faff]">
+                                    <div class="text-[#93adc8] text-base mb-1">開放職缺</div>
+                                    <div class="text-[#1a4b8c] text-lg font-medium">28個</div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="text-[#93adc8] text-base">技能匹配</div>
+                                <div class="flex gap-3">
+                                    <span class="px-4 py-2 bg-[#f8faff] text-[#1a4b8c] rounded-xl text-base font-medium hover:bg-[#f0f7ff] transition-colors">Python</span>
+                                    <span class="px-4 py-2 bg-[#f8faff] text-[#1a4b8c] rounded-xl text-base font-medium hover:bg-[#f0f7ff] transition-colors">Java</span>
+                                    <span class="px-4 py-2 bg-[#f8faff] text-[#1a4b8c] rounded-xl text-base font-medium hover:bg-[#f0f7ff] transition-colors">C++</span>
+                                    <span class="px-4 py-2 bg-[#f8faff] text-[#1a4b8c] rounded-xl text-base font-medium hover:bg-[#f0f7ff] transition-colors">Linux</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Google 企業卡片 -->
+                <div class="card rounded-2xl p-8 animate-fadeIn" style="animation-delay: 0.3s;">
+                    <div class="flex items-start gap-8">
+                        <div class="w-20 h-20 bg-gradient-to-br from-[#0ea5e9] to-[#38bdf8] rounded-xl flex items-center justify-center shadow-lg">
+                            <span class="text-white text-2xl font-bold">G</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 class="text-2xl font-bold text-[#1a4b8c] mb-2">Google Taiwan</h3>
+                                    <p class="text-[#93adc8] text-lg">網際網路服務</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-[#1a4b8c] font-bold text-lg">匹配度</span>
+                                    <div class="px-4 py-2 bg-gradient-to-r from-[#e6f4f1] to-[#f0f7ff] rounded-xl font-bold text-lg text-[#1a4b8c]">
+                                        88%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-6 mb-6">
+                                <div class="p-4 rounded-xl bg-[#f8faff]">
+                                    <div class="text-[#93adc8] text-base mb-1">工作地點</div>
+                                    <div class="text-[#1a4b8c] text-lg font-medium">台北市</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-[#f8faff]">
+                                    <div class="text-[#93adc8] text-base mb-1">公司規模</div>
+                                    <div class="text-[#1a4b8c] text-lg font-medium">1000-5000人</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-[#f8faff]">
+                                    <div class="text-[#93adc8] text-base mb-1">開放職缺</div>
+                                    <div class="text-[#1a4b8c] text-lg font-medium">15個</div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="text-[#93adc8] text-base">技能匹配</div>
+                                <div class="flex gap-3">
+                                    <span class="px-4 py-2 bg-[#f8faff] text-[#1a4b8c] rounded-xl text-base font-medium hover:bg-[#f0f7ff] transition-colors">Python</span>
+                                    <span class="px-4 py-2 bg-[#f8faff] text-[#1a4b8c] rounded-xl text-base font-medium hover:bg-[#f0f7ff] transition-colors">Go</span>
+                                    <span class="px-4 py-2 bg-[#f8faff] text-[#1a4b8c] rounded-xl text-base font-medium hover:bg-[#f0f7ff] transition-colors">Cloud</span>
+                                    <span class="px-4 py-2 bg-[#f8faff] text-[#1a4b8c] rounded-xl text-base font-medium hover:bg-[#f0f7ff] transition-colors">ML</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 背景效果
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            document.querySelector('.bg-pattern').style.backgroundImage = `
+                radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(56, 189, 248, 0.15), transparent 30%),
+                radial-gradient(circle at ${(1-x) * 100}% ${(1-y) * 100}%, rgba(14, 165, 233, 0.1), transparent 30%)
+            `;
+        });
+    </script>
+</body>
+</html> 
