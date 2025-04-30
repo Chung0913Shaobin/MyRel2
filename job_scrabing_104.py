@@ -115,7 +115,7 @@ def extract_job_data(url, keyword):
             print(f"略過非精準職缺: {job_title}")
             return None
 
-        company_div = soup.find('div', class_='mt-5 pr-6')
+        company_div = soup.find('div', class_='mt-3 pr-6')
         company = company_div.find('a').get('title') if company_div and company_div.find('a') else " "
 
         update_div = soup.find('div', class_='job-header__title')
