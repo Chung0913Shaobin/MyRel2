@@ -1,67 +1,59 @@
-import sqlite3
-import pandas as pd
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-# 匯入兩個爬蟲主程式
+import os, sys, sqlite3, pandas as pd, re
 from job_scrabing_104 import run_104_scraping
 from job_scrabing_1111 import run_1111_scraping
+from job_scrabing_yes123 import run_yes123_scraping
 
 def main():
-    # 1️⃣ 執行爬蟲（資料將自動寫入 my_database.db）
-    print("▶ 開始執行 104 爬蟲")
+    # 1. 先跑爬蟲
     run_104_scraping()
-    print("▶ 開始執行 1111 爬蟲")
     run_1111_scraping()
+    run_yes123_scraping()
 
-    # 2️⃣ 連接 SQLite 資料庫
-    db_path = r"d:\\NKNU\\python\\畢業專題\\my_database.db"
-    conn = sqlite3.connect(db_path)
-
-    # 3️⃣ 查詢兩個表格資料
-    query_104 = """
-    SELECT tools, skills, company, job_name, update_time, '104' AS source 
-    FROM job_listings_104 
-    WHERE substr(update_time,1,4) >= '2025'
-    """
-    query_1111 = """
-    SELECT tools, skills, company, job_name, update_time, '1111' AS source 
-    FROM job_listings_1111 
-    WHERE substr(update_time,1,4) >= '2025'
-    """
-    df_104 = pd.read_sql_query(query_104, conn)
-    df_1111 = pd.read_sql_query(query_1111, conn)
+    # 2. 讀 DB
+    db = os.path.join(os.path.dirname(__file__), "my_database.db")
+    conn = sqlite3.connect(db)
+    q104 = "SELECT tools,skills,company,job_name,update_time,'104' AS source FROM job_listings_104 WHERE substr(update_time,1,4)>='2025'"
+    q1111= "SELECT tools,skills,company,job_name,update_time,'1111'AS source FROM job_listings_1111 WHERE substr(update_time,1,4)>='2025'"
+    q123 = "SELECT tools,skills,company,job_name,update_time,'yes123'AS source FROM job_listings_yes123"
+    df104   = pd.read_sql_query(q104,   conn)
+    df1111  = pd.read_sql_query(q1111,  conn)
+    df123   = pd.read_sql_query(q123,   conn)
     conn.close()
 
-    # 4️⃣ 合併兩份資料
-    df = pd.concat([df_104, df_1111], ignore_index=True)
+    # 3. 各自來源去重
+    def dedup(df):
+        df['company_norm'] = df['company'].str.split('・').str[0].str.strip()
+        df = df.drop_duplicates(subset=['job_name','company_norm'], keep='first')
+        return df.drop(columns=['company_norm'])
+    df104  = dedup(df104)
+    df1111 = dedup(df1111)
+    df123  = dedup(df123)
 
-    # — 新增：正規化公司名稱，只保留「・」前面的文字
-    #   遇到「惠璟資訊股份有限公司・20個職缺」就切成「惠璟資訊股份有限公司」
-    df['company_norm'] = df['company'].str.split('・').str[0].str.strip()
+    # 4. 合併所有來源（此時就不會跨來源去重）
+    df = pd.concat([df104, df1111, df123], ignore_index=True)
 
-    # — 刪除「同一 job_name + company_norm」的重複列（保留第一筆）
-    mask = df.duplicated(subset=['job_name','company_norm'], keep='first')
-    df = df.loc[~mask].copy()
+    # 5. 拆 tools 並 explode
+    df['tools_values'] = df['tools'].str.replace(r'[^:；]+[:；]\s*', '', regex=True)
+    df['tool'] = df['tools_values'].apply(lambda x: re.split(r'[、,;]', x))
+    df = df.explode('tool')
+    df['tool'] = df['tool'].str.strip()
+    df = df[df['tool'].notna() & (df['tool'] != '')]
 
-    # — 移除輔助欄
-    df.drop(columns=['company_norm'], inplace=True)
+    # 6. 輸出 CSV（刪舊檔檢查同之前）
+    out = os.path.join(os.path.dirname(__file__), "job_listings_grouped_by_tool.csv")
+    if os.path.isfile(out):
+        try: os.remove(out)
+        except PermissionError:
+            print(f"請先關閉 {out}，再重新執行"); sys.exit(1)
 
-    # 5️⃣ 拆開 tools，展開成每行一個 tool
-    df_exploded = df.assign(tool=df['tools'].str.split(',')).explode('tool')
-    df_exploded['tool'] = df_exploded['tool'].str.strip()
+    df[['tool','skills','company','job_name','update_time','source']]\
+      .sort_values('tool')\
+      .to_csv(out, index=False, encoding="utf-8-sig")
 
-    # 6️⃣ 過濾掉空白工具
-    df_exploded = df_exploded[df_exploded['tool'] != '']
-
-    # 7️⃣ 保留必要欄位
-    df_exploded = df_exploded[['tool','skills','company','job_name','update_time','source']]
-
-    # 8️⃣ 依 tool 排序
-    df_exploded = df_exploded.sort_values(by='tool')
-
-    # 9️⃣ 輸出成 CSV
-    output_path = "job_listings_grouped_by_tool.csv"
-    df_exploded.to_csv(output_path, index=False, encoding="utf-8-sig")
-    print(f"✅ 已成功匯出資料，共 {len(df_exploded)} 筆 (檔名：{output_path})")
+    print(f"✅ 完成，共 {len(df)} 筆，檔案：{out}")
 
 if __name__ == "__main__":
     main()
