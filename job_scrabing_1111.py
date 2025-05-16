@@ -1,6 +1,9 @@
 # job_scrabing_1111.py
 
-import re, time, traceback, sqlite3
+import re
+import time
+import traceback
+import sqlite3
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -8,25 +11,24 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 
 DB_PATH = "my_database.db"
-
-# ==== 修改 ==== 
-MAX_ITEMS = 1000   # 修改: 設定最多抓取職缺數量上限
-# ==== 修改 ==== 
+MAX_ITEMS = 1000   # 設定最多抓取職缺數量上限
 
 def create_database():
-    """建立 1111 職缺 SQLite 資料表"""
+    """建立 1111 職缺 SQLite 資料表（先刪除再重建，新增 location 欄位）"""
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
+    cur.execute('DROP TABLE IF EXISTS job_listings_1111;')
     cur.execute('''
         CREATE TABLE IF NOT EXISTS job_listings_1111 (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            job_title TEXT NOT NULL,
-            tools TEXT,
-            skills TEXT,
-            company TEXT,
-            job_name TEXT,
-            update_time TEXT,
-            source TEXT DEFAULT '1111',
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_title    TEXT    NOT NULL,
+            tools        TEXT,
+            skills       TEXT,
+            company      TEXT,
+            job_name     TEXT,
+            update_time  TEXT,
+            location     TEXT,               -- 新增地點欄位
+            source       TEXT    DEFAULT '1111',
             UNIQUE(job_title, company)
         )
     ''')
@@ -54,37 +56,24 @@ def scroll_in_job_page():
         last = new
 
 def clean_company_name(name):
-    """
-    強力清理公司名稱：
-      1. 去掉「‧」「-」「–」「—」後的「X 個職缺…」
-      2. 移除中/英文括號及其中內容
-    """
     name = re.sub(r'\s*[‧\-－–—]\s*\d+\s*個職缺.*$', '', name)
     name = re.sub(r'\（.*?\）|\(.*?\)', '', name)
     return name.strip()
 
 def get_company_name(soup):
-    """
-    優先從 <a href*="/corp/"> 取得 company，
-    再備援 span.font-medium 類別選擇器。
-    """
-    # 1) /corp/ 連結
     for a in soup.find_all('a', href=lambda x: x and '/corp/' in x):
         txt = a.get_text(strip=True)
         if txt:
             return clean_company_name(txt)
-
-    # 2) 備援
     span = soup.find('span', class_="inline-block font-medium text-[#2066EC] ml-1 text-[14px]")
     if span and span.get_text(strip=True):
         return clean_company_name(span.get_text(strip=True))
-
     return "查無公司"
 
 def extract_job_data(url, job_title):
     """
-    擷取單一職缺詳情：公司、更新時間、工具、技能。
-    使用原本 extract_job_data 的邏輯。
+    擷取單一職缺詳情：公司、更新時間、工具、技能、工作地點。
+    清理所有內部換行，讓輸出一行顯示。
     """
     try:
         driver.get(url)
@@ -112,7 +101,7 @@ def extract_job_data(url, job_title):
                     'p',
                     attrs={'class': lambda c: c and 'underline' in c.split() and 'underline-offset-1' in c.split()}
                 ):
-                    tools.append(p.get_text(strip=True))
+                    tools.append(p.get_text(separator=' ', strip=True))
 
         # 工作技能
         skills = []
@@ -120,18 +109,37 @@ def extract_job_data(url, job_title):
             By.CSS_SELECTOR,
             'li[class*="flex flex-wrap justify-start items-center"]'
         ):
-            txt = li.text.strip()
+            txt = li.text.replace('\n', ' ').strip()
             if txt:
                 skills.append(txt)
 
-        print(f"✔ 擷取: {job_title} | 公司={company} | 工具={tools} | 技能={skills} | 更新={update_time}")
+        # 工作地點
+        location = ""
+        loc_header = soup.find('h3', string=lambda t: t and "工作地點" in t)
+        if loc_header:
+            div_sib = loc_header.find_next_sibling('div')
+            if div_sib:
+                p_loc = div_sib.find('p')
+                if p_loc:
+                    # 用空格接續所有子節點，並去掉多餘換行
+                    location = p_loc.get_text(separator=' ', strip=True).replace('\n', ' ')
+                    # 確保多重空白合併為一個
+                    location = ' '.join(location.split())
+
+        print(
+            f"✔ 擷取: {job_title} | 公司={company} | 工具={tools} | "
+            f"技能={skills} | 更新={update_time} | 地點={location}"
+        )
+
         return {
-            'job_title':    job_title,
-            'tools':        ", ".join(tools),
-            'skills':       ", ".join(skills),
-            'company':      company,
-            'update_time':  update_time
+            'job_title':   job_title,
+            'tools':       ", ".join(tools),
+            'skills':      ", ".join(skills),
+            'company':     company,
+            'update_time': update_time,
+            'location':    location
         }
+
     except Exception as e:
         print(f"❌ extract_job_data 錯誤 ({url})：{e}")
         traceback.print_exc()
@@ -141,16 +149,15 @@ def scrabing(keyword):
     """
     逐頁抓：用 &page=N 分頁，
     每頁用原本 find_all('/job/數字', title=True) 撈連結，
-    無連結即停止。
+    無連結或達到上限即停止。
     """
     results = []
     page = 1
+
     while True:
-        # ==== 修改 ==== 
         if len(results) >= MAX_ITEMS:
             print(f"🔔 已達 {MAX_ITEMS} 筆上限，停止抓取。")
             break
-        # ==== 修改 ==== 
 
         search_url = f"https://www.1111.com.tw/search/job?ks={keyword}&page={page}"
         print(f"\n─── 抓取 1111 關鍵字「{keyword}」第 {page} 頁")
@@ -165,12 +172,9 @@ def scrabing(keyword):
 
         seen = set()
         for a in links:
-            # ==== 修改 ==== 
             if len(results) >= MAX_ITEMS:
                 print(f"🔔 已達 {MAX_ITEMS} 筆上限，停止抓取。")
                 break
-            # ==== 修改 ==== 
-
             href = a['href'].split('?')[0]
             full = urljoin("https://www.1111.com.tw", href)
             if full in seen:
@@ -187,7 +191,7 @@ def scrabing(keyword):
     return results
 
 def store_in_database(job_list, keyword):
-    """把結果寫進 SQLite"""
+    """把結果寫進 SQLite（包含 location 欄位）"""
     if not job_list:
         print(f"[跳過] 『{keyword}』無任何結果")
         return
@@ -196,15 +200,16 @@ def store_in_database(job_list, keyword):
     for item in job_list:
         cur.execute('''
             INSERT OR REPLACE INTO job_listings_1111
-            (job_title, tools, skills, company, job_name, update_time, source)
-            VALUES (?, ?, ?, ?, ?, ?, '1111')
+            (job_title, tools, skills, company, job_name, update_time, location, source)
+            VALUES (?, ?, ?, ?, ?, ?, ?, '1111')
         ''', (
             item['job_title'],
             item['tools'],
             item['skills'],
             item['company'],
             keyword,
-            item['update_time']
+            item['update_time'],
+            item['location']
         ))
     conn.commit()
     conn.close()
@@ -227,7 +232,7 @@ def run_1111_scraping(keywords=None):
             traceback.print_exc()
 
     driver.quit()
-    print("\n☆★☆ 1111職缺爬取完成 ☆★☆")
+    print("\n☆★☆ 1111 職缺爬取完成 ☆★☆")
 
 if __name__ == "__main__":
     run_1111_scraping()

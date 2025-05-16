@@ -46,26 +46,30 @@ def main():
     except Exception as e:
         print(f"[Error] yes123 scraper failed: {e}")
 
-    # 3. 讀取資料庫
+    # 3. 讀取資料庫，從 job_title 欄位取得原始職缺名稱，並把它當成 job_name
     conn = sqlite3.connect(DB_PATH)
     df104 = pd.read_sql_query(
-        "SELECT tools, skills, company, job_name, update_time, '104' AS source "
-        "FROM job_listings_104 WHERE substr(update_time,1,4)>='2025'", conn
+        "SELECT job_title AS job_name, tools, skills, company, update_time, location, '104' AS source "
+        "FROM job_listings_104 WHERE substr(update_time,1,4)>='2025'",
+        conn
     )
     df1111 = pd.read_sql_query(
-        "SELECT tools, skills, company, job_name, update_time, '1111' AS source "
-        "FROM job_listings_1111 WHERE substr(update_time,1,4)>='2025'", conn
+        "SELECT job_title AS job_name, tools, skills, company, update_time, location, '1111' AS source "
+        "FROM job_listings_1111 WHERE substr(update_time,1,4)>='2025'",
+        conn
     )
     df123 = pd.read_sql_query(
-        "SELECT tools, skills, company, job_name, update_time, 'yes123' AS source "
-        "FROM job_listings_yes123", conn
+        "SELECT job_title AS job_name, tools, skills, company, update_time, location, 'yes123' AS source "
+        "FROM job_listings_yes123",
+        conn
     )
     conn.close()
 
     # 4. 來源內部去重
     def dedup(df):
         df["company_norm"] = df["company"].str.split("・").str[0].str.strip()
-        return df.drop_duplicates(subset=["job_name","company_norm"], keep="first").drop(columns=["company_norm"])
+        return df.drop_duplicates(subset=["job_name","company_norm"], keep="first") \
+                 .drop(columns=["company_norm"])
     df104  = dedup(df104)
     df1111 = dedup(df1111)
     df123  = dedup(df123)
@@ -74,7 +78,7 @@ def main():
     df = pd.concat([df104, df1111, df123], ignore_index=True)
     df = df.rename(columns={"tools":"tool"})
 
-    # 6. 輸出 CSV
+    # 6. 輸出 CSV，包含原始職缺名稱 (job_name)
     if os.path.isfile(OUT_CSV):
         try:
             os.remove(OUT_CSV)
@@ -82,7 +86,7 @@ def main():
             print(f"請先關閉檔案 {OUT_CSV}，再重新執行")
             sys.exit(1)
 
-    df[["tool","skills","company","job_name","update_time","source"]] \
+    df[["tool","skills","company","job_name","update_time","location","source"]] \
       .sort_values("tool") \
       .to_csv(OUT_CSV, index=False, encoding="utf-8-sig")
 

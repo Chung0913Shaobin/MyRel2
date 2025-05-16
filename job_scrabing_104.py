@@ -18,22 +18,25 @@ MAX_ITEMS = 1000   # 設定最多抓取職缺數量上限
 def create_database():
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
+    # 每次都先刪除舊表，再重新建立
+    cur.execute('DROP TABLE IF EXISTS job_listings_104;')
     cur.execute('''
         CREATE TABLE IF NOT EXISTS job_listings_104 (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            job_title TEXT NOT NULL,
-            tools TEXT,
-            skills TEXT,
-            company TEXT,
-            job_name TEXT,
-            update_time TEXT,
-            source TEXT DEFAULT '104',
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_title    TEXT    NOT NULL,
+            tools        TEXT,
+            skills       TEXT,
+            company      TEXT,
+            job_name     TEXT,
+            update_time  TEXT,
+            location     TEXT,               -- 新增地點欄位
+            source       TEXT DEFAULT '104',
             UNIQUE(job_title, company)
         )
     ''')
     conn.commit()
     conn.close()
-    print("✅ 資料庫 (104) 建立完成！")
+    print("✅ 資料庫 (104) 重新建立完成！")
 
 def webloading():
     """等待頁面完全載入，再多等 1 秒讓 JS 渲染結束。"""
@@ -44,7 +47,7 @@ def webloading():
     time.sleep(1.0)
 
 def extract_job_data(url):
-    """擷取單一職缺內頁的標題、公司、工具、技能、更新時間。"""
+    """擷取單一職缺內頁的標題、公司、工具、技能、更新時間、工作地點。"""
     try:
         driver.get(url)
         webloading()
@@ -74,8 +77,13 @@ def extract_job_data(url):
             By.CSS_SELECTOR, 'a[class*="skills text-gray-deep-dark"]'
         ) if e.text.strip()]
 
-        print(f"✔ 擷取: {title} | {company} | 工具:{tools} | 技能:{skills} | 更新:{update_time}")
-        return [title, ", ".join(tools), ", ".join(skills), company, update_time]
+        # ==== 新增：工作地點 ====
+        addr_div = soup.find('div', class_=re.compile(r'job-address'))
+        location = addr_div.find('span').get_text(strip=True) \
+                   if addr_div and addr_div.find('span') else ""
+
+        print(f"✔ 擷取: {title} | {company} | 工具:{tools} | 技能:{skills} | 更新:{update_time} | 地點:{location}")
+        return [title, ", ".join(tools), ", ".join(skills), company, update_time, location]
 
     except Exception as e:
         print(f"❌ 擷取失敗 {url}：{e}")
@@ -92,11 +100,11 @@ def scrabing(keyword):
     page = 1
 
     while True:
-        # ==== 修改 ==== 
+        # ==== 修改 ====
         if len(results) >= MAX_ITEMS:
             print(f"🔔 已達 {MAX_ITEMS} 筆上限，停止抓取。")
             break
-        # ==== 修改 ==== 
+        # ==== 修改 ====
 
         url = f"https://www.104.com.tw/jobs/search/?ro=0&kwop=7&keyword={keyword}&page={page}"
         print(f"\n─── 抓取 104 關鍵字「{keyword}」第 {page} 頁 (已抓 {len(results)} 筆)")
@@ -107,11 +115,11 @@ def scrabing(keyword):
         candidates = soup.find_all('a', href=re.compile(r'/job/'))
         links = []
         for a in candidates:
-            # ==== 修改 ==== 
+            # ==== 修改 ====
             if len(results) >= MAX_ITEMS:
                 print(f"🔔 已達 {MAX_ITEMS} 筆上限，停止抓取。")
                 break
-            # ==== 修改 ==== 
+            # ==== 修改 ====
 
             href = a.get('href')
             if not href or '/job/' not in href:
@@ -134,11 +142,11 @@ def scrabing(keyword):
 
         print(f"  → 本頁找到 {len(links)} 個職缺連結")
         for link in links:
-            # ==== 修改 ==== 
+            # ==== 修改 ====
             if len(results) >= MAX_ITEMS:
                 print(f"🔔 已達 {MAX_ITEMS} 筆上限，停止抓取。")
                 break
-            # ==== 修改 ==== 
+            # ==== 修改 ====
 
             data = extract_job_data(link)
             if data:
@@ -150,18 +158,20 @@ def scrabing(keyword):
     return results
 
 def store_in_database(data_list, job_name):
-    """將擷取結果存入 SQLite"""
+    """將擷取結果存入 SQLite（新增 location 欄位）"""
     if not data_list:
         print(f"[跳過] 『{job_name}』無任何結果")
         return
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     for row in data_list:
+        # row = [title, tools, skills, company, update_time, location]
+        title, tools, skills, company, update_time, location = row
         cur.execute('''
             INSERT OR REPLACE INTO job_listings_104
-            (job_title, tools, skills, company, job_name, update_time, source)
-            VALUES (?, ?, ?, ?, ?, ?, '104')
-        ''', (*row, job_name))
+            (job_title, tools, skills, company, job_name, update_time, location, source)
+            VALUES (?, ?, ?, ?, ?, ?, ?, '104')
+        ''', (title, tools, skills, company, job_name, update_time, location))
     conn.commit()
     conn.close()
     print(f"✅ 存入資料庫：『{job_name}』共 {len(data_list)} 筆")
